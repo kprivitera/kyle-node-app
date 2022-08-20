@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/kprivitera/kyle-node-app/issues"
   },
-  "homepage": "https://github.com/kprivitera/kyle-node-app#readme"
+  "homepage": "https://github.com/kprivitera/kyle-node-app#readme",
+  "devDependencies": {
+    "typescript": "^4.7.4"
+  }
 }
