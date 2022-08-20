@@ -1,0 +1,19 @@
+{
+  "name": "kyle-node-app",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kprivitera/kyle-node-app.git"
+  },
+  "author": "Kyle Privitera",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/kprivitera/kyle-node-app/issues"
+  },
+  "homepage": "https://github.com/kprivitera/kyle-node-app#readme"
+}
