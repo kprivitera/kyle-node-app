@@ -1,6 +1,11 @@
 import { ApolloServer, gql } from 'apollo-server';
-import { Client, QueryResult } from 'pg';
+import { Client } from 'pg';
+import { QueryResult } from 'pg';
 import dotenv from "dotenv";
+import path from 'path';
+
+import { makeDatabaseConnection, query} from './database';
+import getSchema from './utils/get-schema';
 
 type WordRow = {
   id: number;
@@ -10,55 +15,35 @@ type WordRow = {
 
 dotenv.config(); //Reads .env file and makes it accessible via process.env
 
-const client = new Client({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  port: Number(process.env.DB_PORT),
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
-});
+const client: Client = makeDatabaseConnection();
 
-client.connect();
+// __dirname not available for esModules.  Basically path to this directory.
+const __dirname: string =  new URL('.', import.meta.url).pathname;
+// an array of apollo directory names eg. ['people', 'recipes']
+const apolloDirectoryPath: string = path.join(__dirname, '/apollo');
+const { typeDefs, resolvers }: { typeDefs: any, resolvers: any } = await getSchema({ apolloDirectory: apolloDirectoryPath });
 
-client.query(`SELECT * FROM words;`, (err: Error, res: QueryResult<WordRow>) => {
-  if (!err){
-    // console.log('res', res.rows);
-  } else {
-    // console.log('err: ', err.message);
-  }
-  client.end();
-});
-
-const typeDefs = gql`
-  type Book {
-    title: String
-    author: String
-  }
+const Query = gql`
   type Query {
-    books: [Book]
+    _empty: String
   }
 `;
 
-const books = [
-  {
-    title: 'The Awakening',
-    author: 'Kate Chopin',
-  },
-  {
-    title: 'City of Glass',
-    author: 'Paul Auster',
-  },
-];
+try {
+  const response: QueryResult<WordRow> = await query<WordRow>(client, `SELECT * FROM words;`);
+  // console.log('response', response.rows);
+} catch (err){
+  console.log(err);
+}
 
-const resolvers = {
-  Query: {
-    books: () => books,
-  },
-};
-
-const server = new ApolloServer({ typeDefs, resolvers });
-
-// localhos:4000
+client.end();
+  
+const server = new ApolloServer({
+  typeDefs: [Query, ...typeDefs],
+  resolvers
+});
+  
+// localhost:4000
 server.listen({ port: process.env.PORT }).then(({ url }) => {
   console.log(`🚀  Server ready at ${url}`);
 });

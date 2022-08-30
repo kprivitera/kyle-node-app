@@ -5,5 +5,7 @@
     "compilerOptions": {
         "outDir": "dist",
         "typeRoots": ["./node_modules/@types"] /* List of folders to include type definitions from. */,
+        "target": "esnext",
+        "module": "esnext"
     }
 }
