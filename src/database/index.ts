@@ -14,10 +14,13 @@ const makeDatabaseConnection = (): pg.Client  => {
     return client;
 };
 
-const query = async <T = Record<string, unknown>>(sql: string, args?: Record<string, unknown>): Promise<QueryResult<T>> => {
+const query = async <T = Record<string, unknown>, U = []>(
+    sql: string, 
+    args?: Array<U>
+): Promise<QueryResult<T>> => {
     const client: pg.Client = makeDatabaseConnection();
     try {
-        const result: QueryResult<T> = await client.query<T>(sql);  
+        const result: QueryResult<T> = await client.query<T>(sql, args);  
         client.end();
         return result;
     } catch (error) {
