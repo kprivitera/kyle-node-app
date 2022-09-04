@@ -1,14 +1,16 @@
 import apolloServer  from 'apollo-server-express';
+
 const { gql } = apolloServer;
 
-const recipeTypeDef = gql`
-  type Book {
-    title: String
-    author: String
+const wordTypeDef = gql`
+  type Word {
+    id: String
+    name: String
+    description: String
   }
   extend type Query {
-    books: [Book]
+    words: [Word]
   }
 `;
 
-export default recipeTypeDef;
+export default wordTypeDef;

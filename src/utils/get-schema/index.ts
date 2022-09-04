@@ -6,12 +6,12 @@ type SchemaType = 'resolvers' | 'type-defs';
 
 const setDirectories = ({ apolloDirectory, apolloSubDirectories }: { apolloDirectory: string, apolloSubDirectories: string[] }) => 
   async ({ type }: { type: SchemaType }) => {
-    const resource = await Promise.all(_.map(apolloSubDirectories, async (directoryName: string) => {
+    const resources = await Promise.all(_.map(apolloSubDirectories, async (directoryName: string) => {
       const typeDefs = await import(path.join(apolloDirectory, directoryName, `${type}.js`));
       return typeDefs.default;
     }));
-    console.log('resource:', resource);
-    return resource;
+    console.log('resource:', resources);
+    return resources;
 }
 
 const getApolloResolvers = async ({ apolloDirectory }: { apolloDirectory: string }) => {
