@@ -10,7 +10,6 @@ const setDirectories = ({ apolloDirectory, apolloSubDirectories }: { apolloDirec
       const typeDefs = await import(path.join(apolloDirectory, directoryName, `${type}.js`));
       return typeDefs.default;
     }));
-    console.log('resource:', resources);
     return resources;
 }
 

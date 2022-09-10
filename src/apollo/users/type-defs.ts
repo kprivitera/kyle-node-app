@@ -11,12 +11,29 @@ const userTypeDef = gql`
     username: String
   }
 
+  type FriendRequest {
+    id: Int
+    status: String
+    senderId: Int
+    recipientId: Int
+  }
+
+  type Friend {
+    id: Int
+    firstName: String
+    lastName: String
+    email: String
+    username: String
+  }
+
   type User {
     id: Int
     firstName: String
     lastName: String
     email: String
     username: String
+    friends: [Friend]
+    friendRequests: [FriendRequest]
   }
 
   type Mutation {

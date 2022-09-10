@@ -27,21 +27,6 @@ const getAllUsers = async () => {
 
 const getSingleUser = async (id: string) => {
     const values = [id];
-    // const result = await Promise.all([
-    //     query(
-    //     'SELECT id, username, email, first_name, last_name FROM users WHERE id = $1',
-    //     values,
-    //     ),
-    //     query(
-    //         `
-    //             SELECT users.id, username, email, first_name, last_name
-    //             FROM users 
-    //             INNER JOIN user_friends 
-    //             ON users.id = user_friends.friend_id 
-    //             WHERE user_id = $1`,
-    //         values,
-    //     ),
-    // ]);
     const result = await query(
         'SELECT id, username, email, first_name, last_name FROM users WHERE id = $1',
         values,
@@ -68,7 +53,6 @@ const updateUser = async (input: InputUser) => {
         input.email,
         input.id,
     ];
-    console.log('values', values);
     const result = await query(text, values);
     return result;
 };
@@ -81,10 +65,58 @@ const deleteUser = async (id: string) => {
     return result.rows;
 };
 
+const getUsersFriends = async (id: string) => {
+    const text = `
+        SELECT users.id, username, email, first_name, last_name
+        FROM users 
+        INNER JOIN user_friends 
+        ON users.id = user_friends.friend_id 
+        WHERE user_id = $1
+    `;
+    const values = [id];
+    const result = await query(text, values);
+    const rowsWithCamelCase = _.map(result.rows, (friend) => convertResultToCamelcase(friend));
+    return rowsWithCamelCase;
+}
+
+  // View all of a users friend requests
+  // in the parenthesis we get back a users
+  const getFriendRequests = async (id: string) => {
+    const text = `
+        WITH returned_friends AS
+            (SELECT friend_requests.sender_id AS user_id, friend_requests.id AS friend_request_id
+            FROM friend_requests 
+            INNER JOIN users on users.id = friend_requests.recipient_id
+            WHERE recipient_id = $1 AND status = 1) 
+        SELECT username, first_name, last_name, email, returned_friends.* 
+        FROM returned_friends 
+        INNER JOIN users ON returned_friends.user_id = users.id
+        `;
+    const values = [id];
+    const result = await query(text, values);
+    return result.rows;
+}
+
+// Check if friend has been added or request pending, if not add friend
+const sendFriendRequest = async (id: string, friendId: string) => {
+    const text = `
+        INSERT INTO user_friend_requests(sender_id, recipient_id, status)
+        SELECT $1, $2, 1 WHERE (
+            NOT EXISTS (SELECT * FROM user_friends WHERE user_id = $1 and friend_id = $2) 
+            AND NOT EXISTS (SELECT * FROM friend_requests WHERE sender_id = $1 and recipient_id = $2)
+        );`;
+    const values = [id, friendId];
+    const result = await query(text, values);
+    return result.rowCount;
+}
+
 export { 
-    getAllUsers,
-    getSingleUser,
     createUser,
-    updateUser,
-    deleteUser
+    deleteUser,
+    getAllUsers,
+    getFriendRequests,
+    getSingleUser,
+    getUsersFriends,
+    sendFriendRequest,
+    updateUser
 };
