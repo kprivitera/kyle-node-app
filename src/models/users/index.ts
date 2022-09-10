@@ -3,6 +3,14 @@ import _ from 'lodash';
 import { query } from '../../database';
 import convertResultToCamelcase from '../../utils/convert-result-to-camelcase';
 
+type InputUser = {
+    id: number,
+    username: string,
+    email: string,
+    firstName: string,
+    lastName: string
+};
+
 type User = {
     id: number,
     username: string,
@@ -41,24 +49,26 @@ const getSingleUser = async (id: string) => {
     return convertResultToCamelcase(_.head(result.rows));
 };
 
-const createUsers = async (user: User) => {
-    const values = [user.first_name, user.last_name, user.email, user.username];
-    const text = 'INSERT INTO users (title, description, image) VALUES ($1, $2, $3)';
+const createUser = async (input: InputUser) => {
+    const values = [input.firstName, input.lastName, input.email, input.username];
+    const text = 'INSERT INTO users (first_name, last_name, email, username) VALUES ($1, $2, $3, $4)';
     const result = await query(text, values);
     return result.rows;
 };
 
-const updateUsers = async (id, req, file) => {
+const updateUser = async (input: InputUser) => {
     const text =
-      'UPDATE users SET username = $1, first_name = $2, last_name = $3, email = $4, image_url = $5 where id = $6';
+    `UPDATE users 
+    SET username = $1, first_name = $2, last_name = $3, email = $4 
+    WHERE id = $5`;
     const values = [
-      req.body.username,
-      req.body.first_name,
-      req.body.last_name,
-      req.body.email,
-      file,
-      id,
+        input.username,
+        input.firstName,
+        input.lastName,
+        input.email,
+        input.id,
     ];
+    console.log('values', values);
     const result = await query(text, values);
     return result;
 };
@@ -74,7 +84,7 @@ const deleteUser = async (id: string) => {
 export { 
     getAllUsers,
     getSingleUser,
-    createUsers,
-    updateUsers,
+    createUser,
+    updateUser,
     deleteUser
 };
