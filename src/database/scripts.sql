@@ -18,7 +18,7 @@ CREATE TABLE public.user_friend_requests (
 	id serial NOT NULL,
 	sender_id int NOT NULL,
 	recipient_id int NOT NULL,
-	status varchar NOT NULL,
+	status int NOT NULL,
 	CONSTRAINT friend_requests_pk PRIMARY KEY (id),
 	CONSTRAINT friend_requests_fk FOREIGN KEY (sender_id) REFERENCES public.users(id),
 	CONSTRAINT friend_requests_fk_1 FOREIGN KEY (recipient_id) REFERENCES public.users(id)

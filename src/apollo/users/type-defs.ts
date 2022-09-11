@@ -12,10 +12,11 @@ const userTypeDef = gql`
   }
 
   type FriendRequest {
-    id: Int
     status: String
     senderId: Int
-    recipientId: Int
+    username: String
+    lastName: String
+    email: String
   }
 
   type Friend {

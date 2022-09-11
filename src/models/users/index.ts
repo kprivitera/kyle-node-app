@@ -83,18 +83,15 @@ const getUsersFriends = async (id: string) => {
   // in the parenthesis we get back a users
   const getFriendRequests = async (id: string) => {
     const text = `
-        WITH returned_friends AS
-            (SELECT friend_requests.sender_id AS user_id, friend_requests.id AS friend_request_id
-            FROM friend_requests 
-            INNER JOIN users on users.id = friend_requests.recipient_id
-            WHERE recipient_id = $1 AND status = 1) 
-        SELECT username, first_name, last_name, email, returned_friends.* 
-        FROM returned_friends 
-        INNER JOIN users ON returned_friends.user_id = users.id
-        `;
+        SELECT username, first_name, last_name, email, status, sender_id
+        FROM user_friend_requests 
+        INNER JOIN users ON user_friend_requests.sender_id  = users.id
+        WHERE recipient_id = $1 AND status = 1;
+    `;
     const values = [id];
     const result = await query(text, values);
-    return result.rows;
+    const rowsWithCamelCase = _.map(result.rows, (friend) => convertResultToCamelcase(friend));
+    return rowsWithCamelCase;
 }
 
 // Check if friend has been added or request pending, if not add friend
