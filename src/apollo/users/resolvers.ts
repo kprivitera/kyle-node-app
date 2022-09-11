@@ -6,6 +6,7 @@ import {
     getFriendRequests, 
     getSingleUser, 
     getUsersFriends,
+    rejectFriendRequest,
     sendFriendRequest,
     updateUser 
 } from '../../models/users';
@@ -17,7 +18,7 @@ const userResolver = {
             return {
                 ...user,
                 friends: async () => await getUsersFriends(id),
-                friendRequests: async () => await getFriendRequests(id)
+                receivedFriendRequests: async () => await getFriendRequests(id)
             }
         },
         users: async () => getAllUsers(),
@@ -43,6 +44,10 @@ const userResolver = {
             console.log('accept friend request');
             const result = acceptFriendRequest(friendRequestId);
             return 'accepted friend request';
+        },
+        rejectFriendRequest: async (parent, { friendRequestId }) => {
+            const result = rejectFriendRequest(friendRequestId);
+            return 'friend request rejected'
         }
     }
 };

@@ -78,11 +78,11 @@ const getUsersFriends = async (id: string) => {
     const result = await query(text, values);
     const rowsWithCamelCase = _.map(result.rows, (friend) => convertResultToCamelcase(friend));
     return rowsWithCamelCase;
-}
+};
 
   // View all of a users friend requests
   // in the parenthesis we get back a users
-  const getFriendRequests = async (id: string) => {
+const getFriendRequests = async (id: string) => {
     const text = `
         SELECT username, first_name, last_name, email, status, sender_id
         FROM user_friend_requests 
@@ -93,7 +93,7 @@ const getUsersFriends = async (id: string) => {
     const result = await query(text, values);
     const rowsWithCamelCase = _.map(result.rows, (friend) => convertResultToCamelcase(friend));
     return rowsWithCamelCase;
-}
+};
 
 // Check if friend has been added or request pending, if not add friend
 const sendFriendRequest = async (userId: string, friendId: string) => {
@@ -123,7 +123,18 @@ const acceptFriendRequest = async (friendRequestId: string) => {
     const values = [friendRequestId];
     const result = await query(text, values);
     return result.rowCount;
-}
+};
+
+const rejectFriendRequest = async (friendRequestId: string) => {
+    const text = `
+        UPDATE user_friend_requests
+        SET status = 3
+        WHERE id = $1
+        RETURNING sender_id, recipient_id`;
+    const values = [friendRequestId];
+    const result = await query(text, values);
+    return result.rowCount;
+};
 
 export {
     acceptFriendRequest,
@@ -133,6 +144,7 @@ export {
     getFriendRequests,
     getSingleUser,
     getUsersFriends,
+    rejectFriendRequest,
     sendFriendRequest,
     updateUser
 };

@@ -34,7 +34,7 @@ const userTypeDef = gql`
     email: String
     username: String
     friends: [Friend]
-    friendRequests: [FriendRequest]
+    receivedFriendRequests: [FriendRequest]
   }
 
   type Mutation {
@@ -43,6 +43,7 @@ const userTypeDef = gql`
     deleteUser(id: Int): ID
     sendFriendRequest(userId: Int, friendId: Int): ID
     acceptFriendRequest(friendRequestId: Int): ID
+    rejectFriendRequest(friendRequestId: Int): ID
   }
 
   extend type Query {
