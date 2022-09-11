@@ -42,10 +42,11 @@ const createUser = async (input: InputUser) => {
 };
 
 const updateUser = async (input: InputUser) => {
-    const text =
-    `UPDATE users 
-    SET username = $1, first_name = $2, last_name = $3, email = $4 
-    WHERE id = $5`;
+    const text =`
+        UPDATE users 
+        SET username = $1, first_name = $2, last_name = $3, email = $4 
+        WHERE id = $5
+    `;
     const values = [
         input.username,
         input.firstName,
@@ -95,19 +96,37 @@ const getUsersFriends = async (id: string) => {
 }
 
 // Check if friend has been added or request pending, if not add friend
-const sendFriendRequest = async (id: string, friendId: string) => {
+const sendFriendRequest = async (userId: string, friendId: string) => {
     const text = `
         INSERT INTO user_friend_requests(sender_id, recipient_id, status)
         SELECT $1, $2, 1 WHERE (
             NOT EXISTS (SELECT * FROM user_friends WHERE user_id = $1 and friend_id = $2) 
-            AND NOT EXISTS (SELECT * FROM friend_requests WHERE sender_id = $1 and recipient_id = $2)
+            AND NOT EXISTS (SELECT * FROM user_friend_requests WHERE sender_id = $1 and recipient_id = $2)
         );`;
-    const values = [id, friendId];
+    const values = [userId, friendId];
+    const result = await query(text, values);
+    return result.rowCount;
+};
+
+  // The friend request will be removed from friend request table and a record will be added to friends
+const acceptFriendRequest = async (friendRequestId: string) => {
+    const text = `
+        WITH friend_request AS (
+            UPDATE user_friend_requests
+            SET status = 2
+            WHERE id = $1
+            RETURNING sender_id, recipient_id
+        )
+        INSERT INTO user_friends (user_id, friend_id) 
+            SELECT sender_id, recipient_id FROM friend_request
+        `;
+    const values = [friendRequestId];
     const result = await query(text, values);
     return result.rowCount;
 }
 
-export { 
+export {
+    acceptFriendRequest,
     createUser,
     deleteUser,
     getAllUsers,

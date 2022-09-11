@@ -41,6 +41,8 @@ const userTypeDef = gql`
     createUser(input: UserInput): User
     updateUser(id: Int, input: UserInput): User
     deleteUser(id: Int): ID
+    sendFriendRequest(userId: Int, friendId: Int): ID
+    acceptFriendRequest(friendRequestId: Int): ID
   }
 
   extend type Query {
