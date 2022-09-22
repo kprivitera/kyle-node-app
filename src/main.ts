@@ -9,6 +9,7 @@ import { DocumentNode } from 'graphql';
 import { makeDatabaseConnection, query} from './database';
 import { refreshTokens } from './apollo/users/refresh-tokens';
 import getSchema from './utils/get-schema';
+import parseCookies from './utils/parse-cookies';
 
 dotenv.config(); //Reads .env file and makes it accessible via process.env
 
@@ -29,11 +30,11 @@ const Query = gql`
 `;
   
 const server = new ApolloServer({
-  cors: {
-    origin: 'http://localhost:3000',
-    methods: 'GET,HEAD,PUT,PATCH,POST',
+  // cors: {
+  //   origin: 'http://localhost:3000',
+  //   methods: 'GET,HEAD,PUT,PATCH,POST',
     // credentials: true
-  },
+  // },
   formatResponse: (response, requestContext) => {
     if (response.errors && !requestContext.request.variables?.password) {
       if (requestContext.response?.http) {
@@ -70,16 +71,9 @@ const server = new ApolloServer({
       username: null,
       refreshToken: null,
     };
-
-    const cookies = (req.headers?.cookie ?? "")
-      .split(";")
-      .reduce<Record<string, string>>((obj, c) => {
-        const [name, value] = c.split("=");
-        obj[name.trim()] = value.trim();
-        return obj;
-      }, {});
-
-    ctx.refreshToken = cookies?.refreshToken;
+    const cookies = req.headers?.cookie || "";
+    const parsedCookies = parseCookies(cookies);
+    ctx.refreshToken = parsedCookies?.refreshToken ? parsedCookies?.refreshToken : ""; 
 
     try {
       if (req.headers["x-access-token"]) {
