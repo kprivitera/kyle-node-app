@@ -44,6 +44,8 @@ const userTypeDef = gql`
     sendFriendRequest(userId: Int, friendId: Int): ID
     acceptFriendRequest(friendRequestId: Int): ID
     rejectFriendRequest(friendRequestId: Int): ID
+    authenticate(username: String!, password: String!): String
+    refresh: String
   }
 
   extend type Query {

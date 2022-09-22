@@ -136,8 +136,13 @@ const rejectFriendRequest = async (friendRequestId: string) => {
     return result.rowCount;
 };
 
+const authenticateUser = () => {
+
+};
+
 export {
     acceptFriendRequest,
+    authenticateUser,
     createUser,
     deleteUser,
     getAllUsers,
