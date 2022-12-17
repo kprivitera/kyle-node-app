@@ -1,3 +1,5 @@
+CREATE DATABASE node_server;
+
 CREATE TABLE public.words (
 	id serial NOT NULL,
 	"name" varchar NOT NULL,

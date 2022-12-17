@@ -9,7 +9,7 @@ const wordTypeDef = gql`
     description: String
   }
   extend type Query {
-    words: [Word]
+    words (itemsByPage: Int,  page: Int): [Word]
   }
 `;
 

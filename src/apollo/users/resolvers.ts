@@ -19,7 +19,7 @@ const JWT_SECRET = process.env.JWT_SECRET || "secret";
 
 const userResolver = {
     Query: {
-        user: async (parent, { id }: { id: string })  => {
+        user: async (parent: any, { id }: { id: string })  => {
             const user = await getSingleUser(id);
             return {
                 ...user,
@@ -30,28 +30,28 @@ const userResolver = {
         users: async () => getAllUsers(),
     },
     Mutation: {
-        createUser: async (_: unknown, { input }) => {
+        createUser: async (_: unknown, { input }: { input: any }) => {
             const newUser = await createUser(input);
             return newUser;
         },
-        updateUser: async (_: unknown, { input }) => {
+        updateUser: async (_: unknown, { input }: { input: any }) => {
             await updateUser(input);
             return 'updated';
         },
-        deleteUser: async (_: unknown, { id }) => {
+        deleteUser: async (_: unknown, { id }: { id: string }) => {
             const result = await deleteUser(id);
             return `User id: ${id} removed`
         },
-        sendFriendRequest: async (_: unknown, { userId, friendId }) => {
+        sendFriendRequest: async (_: unknown, { userId, friendId }: { userId: string, friendId: string }) => {
             const result = await sendFriendRequest(userId, friendId);
             return 'friend request sent';
         },
-        acceptFriendRequest: async (_: unknown, { friendRequestId }) => {
+        acceptFriendRequest: async (_: unknown, { friendRequestId }: { friendRequestId: string }) => {
             console.log('accept friend request');
             const result = acceptFriendRequest(friendRequestId);
             return 'accepted friend request';
         },
-        rejectFriendRequest: async (_: unknown, { friendRequestId }) => {
+        rejectFriendRequest: async (_: unknown, { friendRequestId }: { friendRequestId: string }) => {
             const result = rejectFriendRequest(friendRequestId);
             return 'friend request rejected'
         },
@@ -59,6 +59,7 @@ const userResolver = {
             _: unknown,
             { username, password }: { username: string; password: string }
         ) => {
+            console.log('resolver authenticate run')
             // check if user exists in database and then check their password
             // if (users[username] && users[username].password === password) {
             if (true) {

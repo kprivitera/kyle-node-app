@@ -1,4 +1,4 @@
-import { ApolloServer, gql } from 'apollo-server';
+import { ApolloServer, gql, AuthenticationError } from 'apollo-server';
 import { Client } from 'pg';
 import { v4 as uuidv4 } from 'uuid';
 import dotenv from "dotenv";
@@ -6,7 +6,7 @@ import jwt from "jsonwebtoken";
 import path from 'path';
 
 import { DocumentNode } from 'graphql';
-import { makeDatabaseConnection, query} from './database';
+import { makeDatabaseConnection} from './database';
 import { refreshTokens } from './apollo/users/refresh-tokens';
 import getSchema from './utils/get-schema';
 import parseCookies from './utils/parse-cookies';
@@ -30,14 +30,14 @@ const Query = gql`
 `;
   
 const server = new ApolloServer({
-  // cors: {
-  //   origin: 'http://localhost:3000',
-  //   methods: 'GET,HEAD,PUT,PATCH,POST',
-    // credentials: true
-  // },
+  cors: {
+    origin: ["http://localhost:3000", "https://studio.apollographql.com"],
+    credentials: true
+  },
   formatResponse: (response, requestContext) => {
     if (response.errors && !requestContext.request.variables?.password) {
       if (requestContext.response?.http) {
+        console.log('401 setup');
         requestContext.response.http.status = 401;
       }
     } else if (response.data?.authenticate || response.data?.refresh) {
@@ -73,8 +73,7 @@ const server = new ApolloServer({
     };
     const cookies = req.headers?.cookie || "";
     const parsedCookies = parseCookies(cookies);
-    ctx.refreshToken = parsedCookies?.refreshToken ? parsedCookies?.refreshToken : ""; 
-
+    ctx.refreshToken = parsedCookies?.refreshToken ? parsedCookies?.refreshToken : "";
     try {
       if (req.headers["x-access-token"]) {
         const token = jwt.verify(
@@ -85,7 +84,9 @@ const server = new ApolloServer({
         };
         ctx.username = token.data;
       }
-    } catch (e) {}
+    } catch (e) {
+      console.log('error', e);
+    }
     return ctx;
   },
   typeDefs: [Query, ...typeDefs],

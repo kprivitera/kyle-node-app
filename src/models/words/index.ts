@@ -8,9 +8,12 @@ type WordRow = {
     description: string;
 };
 
-const getWords = async () => {
+const getWords = async ({ itemsByPage, page }: { itemsByPage: number, page: number }) => {
+    const offset = (page - 1) * itemsByPage;
+
     try {
-        const response: QueryResult<WordRow> = await query<WordRow>(`SELECT * FROM words;`);
+        const values = [itemsByPage, offset];
+        const response: QueryResult<WordRow> = await query<WordRow, number>(`SELECT * FROM words ORDER BY name asc LIMIT $1 OFFSET $2;`, values);
         return response.rows;
     } catch (err){
         console.log(err);

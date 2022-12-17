@@ -31,7 +31,7 @@ const getSingleUser = async (id: string) => {
         'SELECT id, username, email, first_name, last_name FROM users WHERE id = $1',
         values,
     );
-    return convertResultToCamelcase(_.head(result.rows));
+    return convertResultToCamelcase(result.rows[0]);
 };
 
 const createUser = async (input: InputUser) => {
@@ -137,7 +137,7 @@ const rejectFriendRequest = async (friendRequestId: string) => {
 };
 
 const authenticateUser = () => {
-
+    
 };
 
 export {
