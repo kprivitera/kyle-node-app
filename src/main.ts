@@ -8,7 +8,6 @@ import _ from "lodash";
 
 import { DocumentNode } from "graphql";
 import { makeDatabaseConnection } from "./database";
-import { refreshTokens } from "./apollo/users/refresh-tokens";
 import { sign, verify } from "./utils/jwt";
 import getSchema from "./utils/get-schema";
 import parseCookies from "./utils/parse-cookies";
@@ -37,62 +36,20 @@ const server = new ApolloServer({
     origin: ["http://localhost:3000", "https://studio.apollographql.com"],
     credentials: true,
   },
-  formatResponse: (response, requestContext: any) => {
-    if (response.errors && !requestContext.request.variables?.password) {
-      if (requestContext.response?.http) {
-        console.log("401 setup");
-        requestContext.response.http.status = 401;
-      }
-    } else if (response.data?.authenticate || response.data?.refresh) {
-      const tokenExpireDate = new Date();
-      tokenExpireDate.setDate(
-        tokenExpireDate.getDate() + 60 * 60 * 24 * 7 // 7 days
-      );
-      const refreshTokenGuid = uuidv4();
-      try {
-        const token = jwt.verify(
-          response.data?.authenticate || response.data?.refresh,
-          JWT_SECRET
-        ) as unknown as {
-          data: string;
-        };
-
-        refreshTokens[refreshTokenGuid] = token.data;
-        const refreshToken = jwt.sign({ data: refreshTokenGuid }, JWT_SECRET, {
-          expiresIn: "7 days",
-        });
-
-        requestContext.context.res.set("set-cookie", [
-          `refreshToken=${refreshToken}`,
-          `isAuthenticated=true`,
-        ]);
-      } catch (error) {
-        requestContext.context.res.set("set-cookie", [`isAuthenticated=false`]);
-      }
-    }
-    return response;
-  },
   context: async ({ req, res }) => {
-    const ctx: { username: string | null; refreshToken: string | null } = {
+    const ctx: { username: string | null } = {
       username: null,
-      refreshToken: null,
     };
-    const cookies = req.headers?.cookie || "";
-    const parsedCookies = parseCookies(cookies);
-    ctx.refreshToken = parsedCookies?.refreshToken
-      ? parsedCookies?.refreshToken
-      : "";
-
     try {
       if (req.headers["x-access-token"]) {
-        const token = jwt.verify(
+        console.log("x-access-token", req.headers["x-access-token"]);
+        const decryptedJTW = (await verify(
           req.headers["x-access-token"] as string,
           JWT_SECRET
-        ) as unknown as {
+        )) as unknown as {
           data: string;
         };
-
-        ctx.username = token.data;
+        ctx.username = decryptedJTW.data;
       }
     } catch (e) {
       console.log("context::error:", e);

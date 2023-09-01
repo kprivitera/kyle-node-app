@@ -15,7 +15,6 @@ import {
   sendFriendRequest,
   updateUser,
 } from "../../models/users";
-import { refreshTokens } from "./refresh-tokens";
 
 const JWT_SECRET = process.env.JWT_SECRET || "secret";
 
@@ -70,38 +69,13 @@ const userResolver = {
       _: unknown,
       { username, password }: { username: string; password: string }
     ) => {
-      console.log("resolver authenticate run", username, password);
       try {
         const { id } = await getUserByCredentials(username, password);
-        return jwt.sign({ data: id }, JWT_SECRET, { expiresIn: "5s" });
+        return await sign({ data: id }, JWT_SECRET, "1h");
+        // return jwt.sign({ data: id }, JWT_SECRET, { expiresIn: "1h" });
       } catch (error) {
+        console.log("error", error);
         throw new AuthenticationError("Invalid credentials");
-      }
-    },
-    refresh: async (
-      _parent: unknown,
-      _args: unknown,
-      { refreshToken }: { refreshToken: string }
-    ) => {
-      try {
-        const token = jwt.verify(refreshToken, JWT_SECRET) as {
-          data: string;
-        };
-
-        if (token.data in refreshTokens) {
-          const newToken = jwt.sign(
-            { data: refreshTokens[token.data] },
-            JWT_SECRET,
-            {
-              expiresIn: "5s",
-            }
-          );
-
-          console.log("refresh mutation new token", newToken);
-          return newToken;
-        }
-      } catch (error) {
-        throw new AuthenticationError("Auth expired");
       }
     },
   },

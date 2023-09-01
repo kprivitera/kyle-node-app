@@ -1,23 +1,23 @@
-import { SignJWT, jwtVerify, type JWTPayload } from "jose";
+import { SignJWT, jwtVerify, generateKeyPair, type JWTPayload } from "jose";
 import util from "util";
 
 type ExtendedJWTPayload<T> = JWTPayload & {
   data: T;
 };
 
+const alg = "HS256";
+
 export async function sign<T>(
   payload: ExtendedJWTPayload<T>,
   secret: string,
   expiry: string
-): Promise<string> {
-  const iat = Math.floor(Date.now() / 1000);
-  //   const exp = iat + 60 * 60; // one hour
-
-  return new SignJWT({ ...payload })
-    .setProtectedHeader({ alg: "HS256", typ: "JWT" })
+): Promise<any> {
+  return new SignJWT(payload)
+    .setProtectedHeader({ alg })
+    .setIssuedAt()
+    .setIssuer("urn:example:issuer")
+    .setAudience("urn:example:audience")
     .setExpirationTime(expiry)
-    .setIssuedAt(iat)
-    .setNotBefore(iat)
     .sign(new util.TextEncoder().encode(secret));
 }
 
