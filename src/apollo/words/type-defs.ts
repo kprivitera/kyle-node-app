@@ -1,15 +1,29 @@
-import apolloServer  from 'apollo-server-express';
+import apolloServer from "apollo-server-express";
 
 const { gql } = apolloServer;
 
 const wordTypeDef = gql`
+  input WordInput {
+    name: String
+    description: String
+  }
+  input UpdateWordInput {
+    id: Int
+    name: String
+    description: String
+  }
   type Word {
     id: String
     name: String
     description: String
   }
+  type Mutation {
+    createWord(input: WordInput): Word
+    updateWord(input: UpdateWordInput): Word
+    deleteWord(id: ID): ID
+  }
   extend type Query {
-    words (itemsByPage: Int,  page: Int): [Word]
+    words(itemsByPage: Int, page: Int): [Word]
   }
 `;
 

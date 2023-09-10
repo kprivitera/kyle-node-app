@@ -1,5 +1,10 @@
 import { AuthenticationError } from "apollo-server";
-import getWords from "../../models/words";
+import {
+  getWords,
+  createWord,
+  updateWord,
+  deleteWord,
+} from "../../models/words";
 
 type Args = {
   itemsByPage: number;
@@ -13,13 +18,24 @@ const wordsResolver = {
       _args: Args,
       context: { username: string }
     ) => {
-      console.log("words resolver ctx", context);
       const { itemsByPage, page } = _args;
       if (!context.username) {
-        console.log("wordsResolver::error:context", context);
         throw new AuthenticationError("Invalid credentials");
       }
       return await getWords({ itemsByPage, page });
+    },
+  },
+  Mutation: {
+    createWord: async (_: unknown, { input }: any) => {
+      return await createWord(input);
+    },
+    updateWord: async (_: unknown, { input }: any) => {
+      await updateWord(input);
+      return input.id;
+    },
+    deleteWord: async (_: unknown, { id }: any) => {
+      const deletedWord = await deleteWord(id);
+      console.log(deletedWord);
     },
   },
 };
