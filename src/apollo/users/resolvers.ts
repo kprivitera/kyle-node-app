@@ -14,6 +14,7 @@ import {
   rejectFriendRequest,
   sendFriendRequest,
   updateUser,
+  searchUsers,
 } from "../../models/users";
 
 const JWT_SECRET = process.env.JWT_SECRET || "secret";
@@ -29,6 +30,12 @@ const userResolver = {
       };
     },
     users: async () => getAllUsers(),
+    searchUsers: async (
+      _parent: any,
+      args: { searchTerm: string; currentUserId: number }
+    ) => {
+      return await searchUsers(args.searchTerm, args.currentUserId);
+    },
   },
   Mutation: {
     createUser: async (_: unknown, { input }: { input: any }) => {

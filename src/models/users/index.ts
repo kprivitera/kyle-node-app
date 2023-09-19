@@ -159,6 +159,27 @@ const getUserByCredentials = async (
   return user;
 };
 
+const searchUsers = async (
+  searchTerm: string,
+  currentUserId: number
+): Promise<Record<string, unknown>[]> => {
+  console.log(searchTerm, currentUserId);
+  const text = `
+    SELECT * FROM users
+    WHERE (username ILIKE $1
+    OR email ILIKE $1
+    OR (first_name || ' ' || last_name) ILIKE $1)
+    AND id != $2
+    `;
+  const values = [`%${searchTerm}%`, currentUserId];
+  const result = await query(text, values);
+  const rowsWithCamelCase = _.map(result.rows, (friend) =>
+    convertResultToCamelcase(friend)
+  );
+
+  return rowsWithCamelCase;
+};
+
 export {
   acceptFriendRequest,
   createUser,
@@ -171,4 +192,5 @@ export {
   rejectFriendRequest,
   sendFriendRequest,
   updateUser,
+  searchUsers,
 };

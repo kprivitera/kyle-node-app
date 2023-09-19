@@ -1,4 +1,4 @@
-import apolloServer  from 'apollo-server-express';
+import apolloServer from "apollo-server-express";
 
 const { gql } = apolloServer;
 
@@ -51,6 +51,7 @@ const userTypeDef = gql`
   extend type Query {
     user(id: Int): User
     users: [User]
+    searchUsers(searchTerm: String!, currentUserId: ID!): [User]
   }
 `;
 

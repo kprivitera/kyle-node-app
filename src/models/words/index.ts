@@ -1,4 +1,5 @@
 import { QueryResult } from "pg";
+import _ from "lodash/fp";
 
 import { query } from "../../database";
 
@@ -14,21 +15,44 @@ type WordRow = Word & {
 const getWords = async ({
   itemsByPage,
   page,
+  letter,
 }: {
   itemsByPage: number;
   page: number;
+  letter: string;
 }) => {
+  // the like is set like this because you cant wrap it with single quotes because the string will be taken
+  // literally like this: LIKE '$1%'. You cant also use double quotes. Instead we You should not use double quotes
+  // around the parameter placeholder, but rather concatenate it with the percentage sign.
   const offset = (page - 1) * itemsByPage;
-
   try {
-    const values = [itemsByPage, offset];
-    const response: QueryResult<WordRow> = await query<WordRow, number>(
-      `SELECT * FROM words ORDER BY name asc LIMIT $1 OFFSET $2;`,
+    const values = [letter, itemsByPage, offset];
+    const response: QueryResult<WordRow> = await query<
+      WordRow,
+      number | string
+    >(
+      `
+      SELECT * FROM words
+      WHERE lower (name) LIKE $1 || '%'
+      ORDER BY name asc
+      LIMIT $2 OFFSET $3;`,
       values
     );
     return response.rows;
   } catch (err) {
     console.log(err);
+  }
+};
+
+const getWord = async ({ id }: { id: number }) => {
+  console.log(id);
+  const values = [id];
+  const text = `SELECT * FROM words where id = $1`;
+  try {
+    const result = await query(text, values);
+    return _.get("rows[0]", result);
+  } catch (error) {
+    console.log(error);
   }
 };
 
@@ -62,4 +86,4 @@ const deleteWord = async (id: number) => {
   return id;
 };
 
-export { getWords, createWord, updateWord, deleteWord };
+export { getWord, getWords, createWord, updateWord, deleteWord };

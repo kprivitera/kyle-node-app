@@ -23,7 +23,9 @@ const wordTypeDef = gql`
     deleteWord(id: ID): ID
   }
   extend type Query {
-    words(itemsByPage: Int, page: Int): [Word]
+    words(itemsByPage: Int, letter: String, page: Int): [Word]
+    word(id: ID): Word
+    searchUsers(searchTerm: String!, currentUserId: ID!): [User]
   }
 `;
 

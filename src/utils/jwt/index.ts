@@ -29,7 +29,6 @@ export async function verify<T>(
     token,
     new util.TextEncoder().encode(secret)
   );
-  console.log("payload", payload);
   const extendedPayload = payload as ExtendedJWTPayload<T>;
   // run some checks on the returned payload, perhaps you expect some specific values
 
