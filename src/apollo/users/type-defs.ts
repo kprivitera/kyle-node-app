@@ -35,6 +35,7 @@ const userTypeDef = gql`
     username: String
     friends: [Friend]
     receivedFriendRequests: [FriendRequest]
+    friendStatus: Int
   }
 
   type Mutation {

@@ -159,25 +159,39 @@ const getUserByCredentials = async (
   return user;
 };
 
-const searchUsers = async (
-  searchTerm: string,
-  currentUserId: number
-): Promise<Record<string, unknown>[]> => {
+const searchUsers = async (searchTerm: string, currentUserId: number) => {
   console.log(searchTerm, currentUserId);
   const text = `
-    SELECT * FROM users
-    WHERE (username ILIKE $1
-    OR email ILIKE $1
-    OR (first_name || ' ' || last_name) ILIKE $1)
-    AND id != $2
+    SELECT users.*, 
+      CASE 
+        WHEN user_friend_requests.status IS NOT NULL THEN user_friend_requests.status
+        WHEN user_friends.user_id IS NOT NULL THEN 2
+        ELSE 0
+      END AS friend_status
+    FROM users
+    LEFT JOIN user_friend_requests 
+      ON users.id IN (user_friend_requests.recipient_id, user_friend_requests.sender_id)
+      AND $2 IN (user_friend_requests.sender_id, user_friend_requests.recipient_id)
+    LEFT JOIN user_friends 
+      ON (users.id = user_friends.user_id AND user_friends.friend_id = $2)
+      OR (users.id = user_friends.friend_id AND user_friends.user_id = $2)
+    WHERE (users.username ILIKE $1
+    OR users.email ILIKE $1
+    OR (users.first_name || ' ' || users.last_name) ILIKE $1)
+    AND users.id != $2
     `;
   const values = [`%${searchTerm}%`, currentUserId];
-  const result = await query(text, values);
-  const rowsWithCamelCase = _.map(result.rows, (friend) =>
-    convertResultToCamelcase(friend)
-  );
+  try {
+    const result = await query(text, values);
+    console.log(result.rows);
+    const rowsWithCamelCase = _.map(result.rows, (friend) =>
+      convertResultToCamelcase(friend)
+    );
 
-  return rowsWithCamelCase;
+    return rowsWithCamelCase;
+  } catch (error) {
+    console.log(error);
+  }
 };
 
 export {
