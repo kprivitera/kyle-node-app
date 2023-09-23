@@ -12,6 +12,7 @@ const userTypeDef = gql`
   }
 
   type FriendRequest {
+    id: Int
     status: String
     senderId: Int
     username: String

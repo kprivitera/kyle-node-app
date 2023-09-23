@@ -73,11 +73,17 @@ const deleteUser = async (id: string) => {
 
 const getUsersFriends = async (id: string) => {
   const text = `
-        SELECT users.id, username, email, first_name, last_name
-        FROM users 
-        INNER JOIN user_friends 
-        ON users.id = user_friends.friend_id 
-        WHERE user_id = $1
+    SELECT users.id, username, email, first_name, last_name
+    FROM users 
+    INNER JOIN user_friends 
+    ON users.id = user_friends.friend_id 
+    WHERE user_id = $1
+    UNION
+    SELECT users.id, username, email, first_name, last_name
+    FROM users 
+    INNER JOIN user_friends 
+    ON users.id = user_friends.user_id 
+    WHERE friend_id = $1
     `;
   const values = [id];
   const result = await query(text, values);
@@ -91,17 +97,22 @@ const getUsersFriends = async (id: string) => {
 // in the parenthesis we get back a users
 const getFriendRequests = async (id: string) => {
   const text = `
-        SELECT username, first_name, last_name, email, status, sender_id
+        SELECT user_friend_requests.id, username, first_name, last_name, email, status, sender_id
         FROM user_friend_requests 
         INNER JOIN users ON user_friend_requests.sender_id  = users.id
         WHERE recipient_id = $1 AND status = 1;
     `;
   const values = [id];
-  const result = await query(text, values);
-  const rowsWithCamelCase = _.map(result.rows, (friend) =>
-    convertResultToCamelcase(friend)
-  );
-  return rowsWithCamelCase;
+  try {
+    const result = await query(text, values);
+    const rowsWithCamelCase = _.map(result.rows, (friend) =>
+      convertResultToCamelcase(friend)
+    );
+    console.log(rowsWithCamelCase);
+    return rowsWithCamelCase;
+  } catch (error) {
+    console.log(error);
+  }
 };
 
 // Check if friend has been added or request pending, if not add friend
@@ -183,7 +194,7 @@ const searchUsers = async (searchTerm: string, currentUserId: number) => {
   const values = [`%${searchTerm}%`, currentUserId];
   try {
     const result = await query(text, values);
-    console.log(result.rows);
+    // console.log(result.rows);
     const rowsWithCamelCase = _.map(result.rows, (friend) =>
       convertResultToCamelcase(friend)
     );
