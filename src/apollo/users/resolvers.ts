@@ -1,5 +1,5 @@
-import jwt from "jsonwebtoken";
-import { AuthenticationError } from "apollo-server";
+import { GraphQLError } from "graphql";
+
 import { sign, verify } from "../../utils/jwt";
 
 import {
@@ -82,7 +82,7 @@ const userResolver = {
         // return jwt.sign({ data: id }, JWT_SECRET, { expiresIn: "1h" });
       } catch (error) {
         console.log("error", error);
-        throw new AuthenticationError("Invalid credentials");
+        throw new GraphQLError("Invalid credentials");
       }
     },
   },

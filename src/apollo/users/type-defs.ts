@@ -1,8 +1,8 @@
-import apolloServer from "apollo-server-express";
-
-const { gql } = apolloServer;
+import gql from "graphql-tag";
 
 const userTypeDef = gql`
+  scalar Upload
+
   input UserInput {
     id: Int
     firstName: String
@@ -39,6 +39,12 @@ const userTypeDef = gql`
     friendStatus: Int
   }
 
+  type File {
+    filename: String!
+    mimetype: String!
+    encoding: String!
+  }
+
   type Mutation {
     createUser(input: UserInput): User
     updateUser(id: Int, input: UserInput): User
@@ -47,7 +53,6 @@ const userTypeDef = gql`
     acceptFriendRequest(friendRequestId: Int): ID
     rejectFriendRequest(friendRequestId: Int): ID
     authenticate(username: String!, password: String!): String
-    refresh: String
   }
 
   extend type Query {

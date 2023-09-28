@@ -1,4 +1,5 @@
-import { AuthenticationError } from "apollo-server";
+import { GraphQLError } from "graphql";
+
 import {
   getWord,
   getWords,
@@ -26,7 +27,7 @@ const wordsResolver = {
       console.log("args", _args);
       const letterValue = letter || DEFAULT_LETTER;
       if (!context.username) {
-        throw new AuthenticationError("Invalid credentials");
+        throw new GraphQLError("Invalid credentials");
       }
       return await getWords({ letter: letterValue, itemsByPage, page });
     },

@@ -1,22 +1,24 @@
-import { ApolloServer, gql, AuthenticationError } from "apollo-server";
-import { Client } from "pg";
-import { v4 as uuidv4 } from "uuid";
-import dotenv from "dotenv";
-import jwt from "jsonwebtoken";
-import path from "path";
 import _ from "lodash";
+import { ApolloServer } from "@apollo/server";
+import { ApolloServerPluginDrainHttpServer } from "@apollo/server/plugin/drainHttpServer";
+import { expressMiddleware } from "@apollo/server/express4";
+import cors from "cors";
+import dotenv from "dotenv";
+import express from "express";
+import gql from "graphql-tag";
+import http from "http";
+import path from "path";
+import pkg from "body-parser";
 
 import { DocumentNode } from "graphql";
-import { makeDatabaseConnection } from "./database";
-import { sign, verify } from "./utils/jwt";
+import { verify } from "./utils/jwt";
 import getSchema from "./utils/get-schema";
-import parseCookies from "./utils/parse-cookies";
+import fileUploadController from "./routes/file-upload";
 
 dotenv.config(); //Reads .env file and makes it accessible via process.env
 
+const { json } = pkg;
 const JWT_SECRET = process.env.JWT_SECRET || "secret";
-
-const client: Client = makeDatabaseConnection();
 
 // __dirname not available for esModules.  Basically path to this directory.
 const __dirname: string = new URL(".", import.meta.url).pathname;
@@ -31,37 +33,57 @@ const Query = gql`
   }
 `;
 
+const app = express();
+const httpServer = http.createServer(app);
+
 const server = new ApolloServer({
-  cors: {
-    origin: ["http://localhost:3000", "https://studio.apollographql.com"],
-    credentials: true,
-  },
-  context: async ({ req, res }) => {
-    const ctx: { username: string | null } = {
-      username: null,
-    };
-    try {
-      if (req.headers["x-access-token"]) {
-        console.log("x-access-token", req.headers["x-access-token"]);
-        const decryptedJTW = (await verify(
-          req.headers["x-access-token"] as string,
-          JWT_SECRET
-        )) as unknown as {
-          data: string;
-        };
-        ctx.username = decryptedJTW.data;
-      }
-    } catch (e) {
-      console.log("context::error:", e);
-    }
-    const contextWithRes = _.set(ctx, "res", res);
-    return contextWithRes;
-  },
   typeDefs: [Query, ...typeDefs],
   resolvers,
+  plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
 });
 
-// localhost:4000
-server.listen({ port: process.env.PORT }).then(({ url }) => {
-  console.log(`🚀  Server ready at ${url}`);
-});
+await server.start();
+
+// const corsOptions = {
+//   origin: ["http://localhost:3000", "https://studio.apollographql.com"],
+//   credentials: true,
+// };
+
+app.use(
+  "/graphql",
+  cors<cors.CorsRequest>({
+    origin: ["http://localhost:3000", "https://studio.apollographql.com"],
+    credentials: true,
+  }),
+  json(),
+  expressMiddleware(server, {
+    context: async ({ req, res }) => {
+      const ctx: { username: string | null } = {
+        username: null,
+      };
+      try {
+        if (req.headers["x-access-token"]) {
+          console.log("x-access-token", req.headers["x-access-token"]);
+          const decryptedJTW = (await verify(
+            req.headers["x-access-token"] as string,
+            JWT_SECRET
+          )) as unknown as {
+            data: string;
+          };
+          ctx.username = decryptedJTW.data;
+        }
+      } catch (e) {
+        console.log("context::error:", e);
+      }
+      const contextWithRes = _.set(ctx, "res", res);
+      return contextWithRes;
+    },
+  })
+);
+
+// app.get("/file-upload", fileUploadController);
+
+await new Promise<void>((resolve) =>
+  httpServer.listen({ port: process.env.PORT }, resolve)
+);
+console.log(`🚀 Server ready at http://localhost:4000/graphql`);

@@ -1,6 +1,4 @@
-import apolloServer  from 'apollo-server-express';
-
-const { gql } = apolloServer;
+import gql from "graphql-tag";
 
 const recipeTypeDef = gql`
   type Recipe {
