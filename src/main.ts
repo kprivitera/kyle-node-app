@@ -9,11 +9,13 @@ import gql from "graphql-tag";
 import http from "http";
 import path from "path";
 import pkg from "body-parser";
+import multer from "multer";
 
 import { DocumentNode } from "graphql";
 import { verify } from "./utils/jwt";
 import getSchema from "./utils/get-schema";
 import fileUploadController from "./routes/file-upload";
+import getMulterConfig from "./models/file-upload/utils/get-multer-config";
 
 dotenv.config(); //Reads .env file and makes it accessible via process.env
 
@@ -44,11 +46,6 @@ const server = new ApolloServer({
 
 await server.start();
 
-// const corsOptions = {
-//   origin: ["http://localhost:3000", "https://studio.apollographql.com"],
-//   credentials: true,
-// };
-
 app.use(
   "/graphql",
   cors<cors.CorsRequest>({
@@ -63,7 +60,6 @@ app.use(
       };
       try {
         if (req.headers["x-access-token"]) {
-          console.log("x-access-token", req.headers["x-access-token"]);
           const decryptedJTW = (await verify(
             req.headers["x-access-token"] as string,
             JWT_SECRET
@@ -81,7 +77,12 @@ app.use(
   })
 );
 
-// app.get("/file-upload", fileUploadController);
+const upload = multer({ dest: "uploads/", storage: getMulterConfig() });
+app.post(
+  "/file-upload/:entityType/:id",
+  upload.single("file"),
+  fileUploadController
+);
 
 await new Promise<void>((resolve) =>
   httpServer.listen({ port: process.env.PORT }, resolve)

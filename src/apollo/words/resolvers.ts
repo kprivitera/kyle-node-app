@@ -24,7 +24,6 @@ const wordsResolver = {
       context: { username: string }
     ) => {
       const { letter, itemsByPage, page } = _args;
-      console.log("args", _args);
       const letterValue = letter || DEFAULT_LETTER;
       if (!context.username) {
         throw new GraphQLError("Invalid credentials");
