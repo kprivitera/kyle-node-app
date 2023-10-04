@@ -14,6 +14,8 @@ CREATE TABLE public.users (
 	email varchar NULL,
 	username varchar NOT NULL,
 	password varchar NOT NULL,
+	profile_image varchar NOT NULL,
+	cover_image varchar NOT NULL,
 	CONSTRAINT users_pk PRIMARY KEY (id)
 );
 

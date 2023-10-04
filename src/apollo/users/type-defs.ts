@@ -37,6 +37,8 @@ const userTypeDef = gql`
     friends: [Friend]
     receivedFriendRequests: [FriendRequest]
     friendStatus: Int
+    profileImage: String
+    coverImage: String
   }
 
   type File {
@@ -53,6 +55,8 @@ const userTypeDef = gql`
     acceptFriendRequest(friendRequestId: Int): ID
     rejectFriendRequest(friendRequestId: Int): ID
     authenticate(username: String!, password: String!): String
+    updateCoverImage(id: Int, imageUrl: String): String
+    updateProfileImage(id: Int, imageUrl: String): String
   }
 
   extend type Query {

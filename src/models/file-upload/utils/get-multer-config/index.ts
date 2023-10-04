@@ -8,10 +8,15 @@ const getMulterConfig = () =>
     destination: (req, file, cb) => {
       const id = req.params.id;
       const entityType = req.params.entityType;
-      const dir = `./uploads/${entityType}/${id}`;
+      const dir = `./public/uploads/${entityType}/${id}`;
 
-      // Create directory if it doesn't exist
-      if (!fs.existsSync(dir)) {
+      // Delete files in directory if it exists
+      if (fs.existsSync(dir)) {
+        fs.readdirSync(dir).forEach((file) => {
+          fs.unlinkSync(path.join(dir, file));
+        });
+      } else {
+        // Create directory if it doesn't exist
         fs.mkdirSync(dir, { recursive: true });
       }
 

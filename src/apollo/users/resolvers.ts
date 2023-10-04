@@ -16,6 +16,7 @@ import {
   updateUser,
   searchUsers,
 } from "../../models/users";
+import { updateCoverImage, updateProfileImage } from "../../models/file-upload";
 
 const JWT_SECRET = process.env.JWT_SECRET || "secret";
 
@@ -45,6 +46,20 @@ const userResolver = {
     updateUser: async (_: unknown, { input }: { input: any }) => {
       await updateUser(input);
       return "updated";
+    },
+    updateProfileImage: async (
+      _: unknown,
+      { id, imageUrl }: { id: number; imageUrl: string }
+    ) => {
+      const result = await updateProfileImage(id, imageUrl);
+      return imageUrl;
+    },
+    updateCoverImage: async (
+      _: unknown,
+      { id, imageUrl }: { id: number; imageUrl: string }
+    ) => {
+      const result = await updateCoverImage(id, imageUrl);
+      return imageUrl;
     },
     deleteUser: async (_: unknown, { id }: { id: string }) => {
       const result = await deleteUser(id);

@@ -21,7 +21,7 @@ type User = {
 
 const getAllUsers = async () => {
   const result = await query(
-    "SELECT id, username, email, first_name, last_name FROM users"
+    "SELECT id, username, email, first_name, last_name, profile_image, cover_image FROM users"
   );
   const rowsWithCamelCase = _.map(result.rows, (user) =>
     convertResultToCamelcase(user)
@@ -32,9 +32,10 @@ const getAllUsers = async () => {
 const getSingleUser = async (id: string) => {
   const values = [id];
   const result = await query(
-    "SELECT id, username, email, first_name, last_name FROM users WHERE id = $1",
+    "SELECT id, username, email, first_name, last_name, profile_image, cover_image FROM users WHERE id = $1",
     values
   );
+  console.log(result.rows[0]);
   return convertResultToCamelcase(result.rows[0]);
 };
 
@@ -108,7 +109,6 @@ const getFriendRequests = async (id: string) => {
     const rowsWithCamelCase = _.map(result.rows, (friend) =>
       convertResultToCamelcase(friend)
     );
-    console.log(rowsWithCamelCase);
     return rowsWithCamelCase;
   } catch (error) {
     console.log(error);
@@ -171,7 +171,6 @@ const getUserByCredentials = async (
 };
 
 const searchUsers = async (searchTerm: string, currentUserId: number) => {
-  console.log(searchTerm, currentUserId);
   const text = `
     SELECT users.*, 
       CASE 
@@ -194,7 +193,6 @@ const searchUsers = async (searchTerm: string, currentUserId: number) => {
   const values = [`%${searchTerm}%`, currentUserId];
   try {
     const result = await query(text, values);
-    // console.log(result.rows);
     const rowsWithCamelCase = _.map(result.rows, (friend) =>
       convertResultToCamelcase(friend)
     );

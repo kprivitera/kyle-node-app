@@ -77,12 +77,16 @@ app.use(
   })
 );
 
-const upload = multer({ dest: "uploads/", storage: getMulterConfig() });
+// file upload route
+const upload = multer({ storage: getMulterConfig() });
 app.post(
   "/file-upload/:entityType/:id",
   upload.single("file"),
   fileUploadController
 );
+
+// static assets route
+app.use("/uploads", express.static("public/uploads"));
 
 await new Promise<void>((resolve) =>
   httpServer.listen({ port: process.env.PORT }, resolve)

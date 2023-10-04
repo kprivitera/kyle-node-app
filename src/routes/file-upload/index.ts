@@ -1,7 +1,10 @@
 import { Request, Response } from "express";
 
 const fileUploadController = (req: Request, res: Response) => {
-  res.send("Hello from new route2!");
+  console.log(req.file);
+  const filePath = req.file?.path || "";
+  const publicRoute = filePath.replace("public/", "");
+  res.json(publicRoute);
 };
 
 export default fileUploadController;
