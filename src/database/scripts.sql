@@ -38,3 +38,27 @@ CREATE TABLE public.user_friends (
 	CONSTRAINT user_friends_fk_1 FOREIGN KEY (friend_id) REFERENCES public.users(id)
 );
 
+CREATE TABLE authors (
+    id SERIAL PRIMARY KEY,
+    first_name VARCHAR(255),
+    last_name VARCHAR(255),
+    description TEXT,
+    image VARCHAR(255)
+);
+
+CREATE TABLE books (
+    id SERIAL PRIMARY KEY,
+    title VARCHAR(255),
+    description TEXT,
+    author_id INTEGER REFERENCES author(id),
+    cover_image VARCHAR(255),
+    page_count INTEGER,
+    publish_date DATE
+);
+
+CREATE TABLE book_ratings (
+    user_id INT REFERENCES users(id),
+    book_id INT REFERENCES books(id),
+    rating INT CHECK(rating >= 1 AND rating <= 5),
+    PRIMARY KEY (user_id, book_id)
+);
