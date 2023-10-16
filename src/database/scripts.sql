@@ -62,3 +62,28 @@ CREATE TABLE book_ratings (
     rating INT CHECK(rating >= 1 AND rating <= 5),
     PRIMARY KEY (user_id, book_id)
 );
+
+CREATE TABLE genres (
+    id SERIAL PRIMARY KEY,
+    title VARCHAR(255),
+    description TEXT
+);
+
+CREATE TABLE book_genres (
+    book_id INTEGER REFERENCES books(id),
+    genre_id INTEGER REFERENCES genres(id),
+    PRIMARY KEY (book_id, genre_id)
+);
+
+CREATE TABLE series (
+    id SERIAL PRIMARY KEY,
+    title VARCHAR(255),
+    description TEXT
+);
+
+CREATE TABLE book_series (
+    book_id INTEGER REFERENCES books(id),
+    series_id INTEGER REFERENCES series(id),
+	series_number INTEGER,
+    PRIMARY KEY (book_id, series_id)
+);
