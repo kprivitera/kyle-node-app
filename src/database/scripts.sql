@@ -87,3 +87,14 @@ CREATE TABLE book_series (
 	series_number INTEGER,
     PRIMARY KEY (book_id, series_id)
 );
+
+
+CREATE OR REPLACE FUNCTION make_rating(userId INTEGER, bookId INTEGER, rating INTEGER)
+RETURNS VOID AS
+$$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM book_ratings WHERE user_id = userId AND book_id = bookId) THEN
+        INSERT INTO book_ratings (user_id, book_id, rating) VALUES (userId, bookId, rating);
+    END IF;
+END;
+$$ LANGUAGE plpgsql;
