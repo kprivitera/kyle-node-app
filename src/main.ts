@@ -69,7 +69,7 @@ app.use(
           ctx.username = decryptedJTW.data;
         }
       } catch (e) {
-        console.log("context::error:", e);
+        // console.log("context::error:", e);
       }
       const contextWithRes = _.set(ctx, "res", res);
       return contextWithRes;

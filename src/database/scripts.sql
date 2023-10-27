@@ -88,6 +88,23 @@ CREATE TABLE book_series (
     PRIMARY KEY (book_id, series_id)
 );
 
+CREATE TABLE book_reviews (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER REFERENCES users(id),
+    book_id INTEGER REFERENCES books(id),
+    review TEXT,
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY(user_id, book_id) REFERENCES book_ratings(user_id, book_id)
+    UNIQUE(user_id, book_id)
+);
+
+CREATE TABLE review_comments (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER REFERENCES users(id),
+    review_id INTEGER REFERENCES book_reviews(id),
+    comment TEXT,
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 
 CREATE OR REPLACE FUNCTION make_rating(userId INTEGER, bookId INTEGER, rating INTEGER)
 RETURNS VOID AS

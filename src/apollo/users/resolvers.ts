@@ -76,7 +76,6 @@ const userResolver = {
       _: unknown,
       { friendRequestId }: { friendRequestId: string }
     ) => {
-      console.log("accept friend request");
       const result = acceptFriendRequest(friendRequestId);
       return "accepted friend request";
     },

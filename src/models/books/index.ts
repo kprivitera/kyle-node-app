@@ -93,7 +93,6 @@ const getBookRatings = async (bookId: number, userId?: number) => {
         book_id;`,
       values
     );
-    console.log("rating", result.rows);
     const { averageRating, count, hasUserRated, userRating, ratingsBreakdown } =
       convertResultToCamelcase(result.rows[0]);
     return { averageRating, count, hasUserRated, userRating, ratingsBreakdown };
@@ -142,6 +141,81 @@ const makeRating = async (bookId: number, userId: number, rating: number) => {
   }
 };
 
+const makeReview = async (review: string, bookId: number, userId: number) => {
+  const values = [userId, bookId, review];
+  const text =
+    "INSERT INTO book_reviews (user_id, book_id, review) VALUES ($1, $2, $3) RETURNING id;";
+  try {
+    const result = await query(text, values);
+    return result.rows[0].id;
+  } catch (error) {
+    console.log("error", error);
+  }
+};
+
+const makeRatingAndReview = async (
+  bookId: number,
+  userId: number,
+  rating: number,
+  review: string
+) => {
+  try {
+    if (rating) {
+      await makeRating(bookId, userId, rating);
+    }
+    const reviewId = await makeReview(review, bookId, userId);
+    return reviewId;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+const getBookReviews = async (bookId: number, userId?: number) => {
+  const values = [bookId];
+
+  let queryText = `SELECT book_reviews.id, review, timestamp, users.first_name, users.last_name, users.profile_image, users.username, book_ratings.rating 
+     FROM book_reviews
+     JOIN users ON book_reviews.user_id = users.id
+     JOIN book_ratings ON book_reviews.user_id = book_ratings.user_id AND book_reviews.book_id = book_ratings.book_id
+     WHERE book_reviews.book_id = $1`;
+
+  if (userId) {
+    queryText += " AND book_reviews.user_id != $2";
+    values.push(userId);
+  }
+
+  try {
+    const result = await query(queryText, values);
+    const rowsWithCamelCase = _.map(result.rows, (user) =>
+      convertResultToCamelcase(user)
+    );
+    return rowsWithCamelCase;
+  } catch (error) {
+    console.log("error", error);
+  }
+};
+
+const getUserReview = async (bookId: number, userId: number) => {
+  const values = [bookId, userId];
+
+  try {
+    const result = await query(
+      `SELECT book_reviews.id, review, timestamp, users.first_name, users.last_name, users.profile_image, users.username, book_ratings.rating 
+       FROM book_reviews
+       JOIN users ON book_reviews.user_id = users.id
+       JOIN book_ratings ON book_reviews.user_id = book_ratings.user_id AND book_reviews.book_id = book_ratings.book_id
+       WHERE book_reviews.book_id = $1 AND users.id = $2;`,
+      values
+    );
+    const rowsWithCamelCase = _.map(result.rows, (user) =>
+      convertResultToCamelcase(user)
+    );
+    return rowsWithCamelCase[0];
+  } catch (error) {
+    console.log("error", error);
+  }
+};
+
 export {
   getAllBooks,
   getAllAuthors,
@@ -152,4 +226,8 @@ export {
   getBookRatings,
   makeRating,
   searchAllBooks,
+  makeReview,
+  getBookReviews,
+  makeRatingAndReview,
+  getUserReview,
 };

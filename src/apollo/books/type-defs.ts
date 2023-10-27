@@ -37,6 +37,17 @@ const booksTypeDef = gql`
     ratingsBreakdown: RatingsBreakdown
   }
 
+  type Review {
+    id: Int
+    review: String
+    timestamp: String
+    firstName: String
+    lastName: String
+    profileImage: String
+    username: String
+    rating: Int
+  }
+
   type Book {
     id: Int
     title: String
@@ -47,6 +58,8 @@ const booksTypeDef = gql`
     coverImage: String
     series: Series
     ratings: Ratings
+    reviews: [Review]
+    userReview: Review
   }
 
   type SearchResult {
@@ -60,6 +73,13 @@ const booksTypeDef = gql`
 
   type Mutation {
     makeRating(bookId: Int, userId: Int, rating: Int): Int
+    makeReview(bookId: Int, userId: Int, review: String): Int
+    makeRatingAndReview(
+      bookId: Int
+      userId: Int
+      rating: Int
+      review: String
+    ): Int
   }
 
   extend type Query {

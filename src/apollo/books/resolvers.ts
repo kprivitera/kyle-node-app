@@ -8,6 +8,10 @@ import {
   getBookRatings,
   searchAllBooks,
   makeRating,
+  makeReview,
+  getBookReviews,
+  makeRatingAndReview,
+  getUserReview,
 } from "../../models/books";
 
 const userResolver = {
@@ -41,6 +45,12 @@ const userResolver = {
     ratings: async (book: any) => {
       return await getBookRatings(book.id, book.userId);
     },
+    reviews: async (book: any) => {
+      return await getBookReviews(book.id, book.userId);
+    },
+    userReview: async (book: any) => {
+      return await getUserReview(book.id, book.userId);
+    },
   },
   Mutation: {
     makeRating: async (
@@ -52,6 +62,28 @@ const userResolver = {
       }: { bookId: number; userId: number; rating: number }
     ) => {
       return await makeRating(bookId, userId, rating);
+    },
+    makeReview: async (
+      _: unknown,
+      {
+        bookId,
+        userId,
+        review,
+      }: { bookId: number; userId: number; review: string }
+    ) => {
+      console.log("resolver", { bookId, userId, review });
+      return await makeReview(review, bookId, userId);
+    },
+    makeRatingAndReview: async (
+      _: unknown,
+      {
+        bookId,
+        userId,
+        rating,
+        review,
+      }: { bookId: number; userId: number; rating: number; review: string }
+    ) => {
+      return await makeRatingAndReview(bookId, userId, rating, review);
     },
   },
 };

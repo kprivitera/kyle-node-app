@@ -35,7 +35,6 @@ const getSingleUser = async (id: string) => {
     "SELECT id, username, email, first_name, last_name, profile_image, cover_image FROM users WHERE id = $1",
     values
   );
-  console.log(result.rows[0]);
   return convertResultToCamelcase(result.rows[0]);
 };
 

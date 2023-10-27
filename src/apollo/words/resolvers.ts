@@ -47,15 +47,11 @@ const wordsResolver = {
       return await createWord(input);
     },
     updateWord: async (_: unknown, { input }: any) => {
-      console.log("update", input);
       await updateWord(input);
-      console.log("updated");
       return input.id;
     },
     deleteWord: async (_: unknown, { id }: any) => {
-      console.log("delete", id);
       const deletedWord = await deleteWord(id);
-      console.log(deletedWord);
     },
   },
 };
