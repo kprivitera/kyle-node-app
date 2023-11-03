@@ -37,6 +37,14 @@ const booksTypeDef = gql`
     ratingsBreakdown: RatingsBreakdown
   }
 
+  type Comment {
+    id: Int
+    comment: String
+    timestamp: String
+    username: String
+    profileImage: String
+  }
+
   type Review {
     id: Int
     review: String
@@ -46,6 +54,7 @@ const booksTypeDef = gql`
     profileImage: String
     username: String
     rating: Int
+    comments: [Comment]
   }
 
   type Book {
@@ -80,6 +89,7 @@ const booksTypeDef = gql`
       rating: Int
       review: String
     ): Int
+    makeComment(userId: Int, reviewId: Int, comment: String): Int
   }
 
   extend type Query {

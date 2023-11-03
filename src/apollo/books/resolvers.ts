@@ -12,6 +12,7 @@ import {
   getBookReviews,
   makeRatingAndReview,
   getUserReview,
+  makeComment,
 } from "../../models/books";
 
 const userResolver = {
@@ -84,6 +85,16 @@ const userResolver = {
       }: { bookId: number; userId: number; rating: number; review: string }
     ) => {
       return await makeRatingAndReview(bookId, userId, rating, review);
+    },
+    makeComment: async (
+      _: unknown,
+      {
+        reviewId,
+        userId,
+        comment,
+      }: { userId: number; reviewId: number; comment: string }
+    ) => {
+      return await makeComment(comment, reviewId, userId);
     },
   },
 };

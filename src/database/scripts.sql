@@ -106,6 +106,43 @@ CREATE TABLE review_comments (
     timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE book_clubs (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255),
+    description TEXT,
+    leader_id INTEGER REFERENCES users(id),
+    theme VARCHAR(255),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE club_books (
+    id SERIAL PRIMARY KEY,
+    book_club_id INTEGER REFERENCES book_clubs(id),
+    book_id INTEGER REFERENCES books(id),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE club_members (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER REFERENCES users(id),
+    book_club_id INTEGER REFERENCES book_clubs(id),
+    joined_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE club_schedules (
+    id SERIAL PRIMARY KEY,
+    book_club_id INTEGER REFERENCES book_clubs(id),
+    book_id INTEGER REFERENCES books(id),
+    start_date DATE,
+    end_date DATE,
+    recurring BOOLEAN,
+    recurrence_pattern VARCHAR(255),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 CREATE OR REPLACE FUNCTION make_rating(userId INTEGER, bookId INTEGER, rating INTEGER)
 RETURNS VOID AS
 $$

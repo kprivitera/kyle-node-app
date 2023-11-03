@@ -1,4 +1,5 @@
 import _ from "lodash";
+import { map, set } from "lodash/fp";
 
 import { query } from "../../database";
 import convertResultToCamelcase from "../../utils/convert-result-to-camelcase";
@@ -173,10 +174,12 @@ const makeRatingAndReview = async (
 const getBookReviews = async (bookId: number, userId?: number) => {
   const values = [bookId];
 
-  let queryText = `SELECT book_reviews.id, review, timestamp, users.first_name, users.last_name, users.profile_image, users.username, book_ratings.rating 
-     FROM book_reviews
+  let queryText = `SELECT book_reviews.id, review, book_reviews.timestamp, users.first_name, users.last_name, users.profile_image, users.username, book_ratings.rating,
+     ARRAY_AGG(json_build_object('id', review_comments.id, 'comment', comment, 'timestamp', review_comments.timestamp, 'username', commenters.username, 'profile_image', commenters.profile_image)) AS comments     FROM book_reviews
      JOIN users ON book_reviews.user_id = users.id
      JOIN book_ratings ON book_reviews.user_id = book_ratings.user_id AND book_reviews.book_id = book_ratings.book_id
+     LEFT JOIN review_comments ON book_reviews.id = review_comments.review_id
+     LEFT JOIN users AS commenters ON review_comments.user_id = commenters.id
      WHERE book_reviews.book_id = $1`;
 
   if (userId) {
@@ -184,11 +187,16 @@ const getBookReviews = async (bookId: number, userId?: number) => {
     values.push(userId);
   }
 
+  queryText +=
+    " GROUP BY book_reviews.id, users.first_name, users.last_name, users.profile_image, users.username, book_ratings.rating";
+
   try {
     const result = await query(queryText, values);
+    // console.log(result.rows[0]);
     const rowsWithCamelCase = _.map(result.rows, (user) =>
       convertResultToCamelcase(user)
     );
+    console.log(rowsWithCamelCase[0]);
     return rowsWithCamelCase;
   } catch (error) {
     console.log("error", error);
@@ -216,6 +224,22 @@ const getUserReview = async (bookId: number, userId: number) => {
   }
 };
 
+const makeComment = async (
+  comment: string,
+  reviewId: number,
+  userId: number
+) => {
+  const values = [userId, reviewId, comment];
+  const text =
+    "INSERT INTO review_comments (user_id, review_id, comment) VALUES ($1, $2, $3) RETURNING id;";
+  try {
+    const result = await query(text, values);
+    return result.rows[0].id;
+  } catch (error) {
+    console.log("error", error);
+  }
+};
+
 export {
   getAllBooks,
   getAllAuthors,
@@ -230,4 +254,5 @@ export {
   getBookReviews,
   makeRatingAndReview,
   getUserReview,
+  makeComment,
 };

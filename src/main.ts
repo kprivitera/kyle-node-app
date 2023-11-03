@@ -7,15 +7,16 @@ import dotenv from "dotenv";
 import express from "express";
 import gql from "graphql-tag";
 import http from "http";
+import multer from "multer";
 import path from "path";
 import pkg from "body-parser";
-import multer from "multer";
 
 import { DocumentNode } from "graphql";
 import { verify } from "./utils/jwt";
 import getSchema from "./utils/get-schema";
 import fileUploadController from "./routes/file-upload";
 import getMulterConfig from "./models/file-upload/utils/get-multer-config";
+import initialiseCron from "./utils/initialise-cron";
 
 dotenv.config(); //Reads .env file and makes it accessible via process.env
 
@@ -87,6 +88,9 @@ app.post(
 
 // static assets route
 app.use("/uploads", express.static("public/uploads"));
+
+// Define your cron job
+initialiseCron();
 
 await new Promise<void>((resolve) =>
   httpServer.listen({ port: process.env.PORT }, resolve)
