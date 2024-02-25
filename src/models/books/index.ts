@@ -1,13 +1,17 @@
-import _ from "lodash";
 import { map, set } from "lodash/fp";
+import _ from "lodash";
 
 import { query } from "../../database";
 import convertResultToCamelcase from "../../utils/convert-result-to-camelcase";
 import convertResultToCamelcaseArray from "../../utils/convert-result-to-camelcase-array";
 
-const getAllBooks = async () => {
+const getAllBooks = async (ids?: number[]) => {
+  const hasIds = ids && ids.length > 0;
+  const queryWithIds = hasIds ? "WHERE id = ANY($1::int[]) " : "";
+  const values = hasIds ? [ids] : [];
   const result = await query(
-    "SELECT id, title, description, page_count, author_id, cover_image FROM books ORDER BY id"
+    `SELECT id, title, description, page_count, author_id, cover_image FROM books ${queryWithIds}ORDER BY id`,
+    values
   );
   const rowsWithCamelCase = _.map(result.rows, (user) =>
     convertResultToCamelcase(user)

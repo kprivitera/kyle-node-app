@@ -23,7 +23,6 @@ const wordTypeDef = gql`
   extend type Query {
     words(itemsByPage: Int, letter: String, page: Int): [Word]
     word(id: ID): Word
-    searchUsers(searchTerm: String!, currentUserId: ID!): [User]
   }
 `;
 

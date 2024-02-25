@@ -170,6 +170,7 @@ const getUserByCredentials = async (
 };
 
 const searchUsers = async (searchTerm: string, currentUserId: number) => {
+  console.log(searchTerm, currentUserId);
   const text = `
     SELECT users.*, 
       CASE 

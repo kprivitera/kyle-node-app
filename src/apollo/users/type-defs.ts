@@ -39,6 +39,7 @@ const userTypeDef = gql`
     friendStatus: Int
     profileImage: String
     coverImage: String
+    bookClubs: [BookClub]
   }
 
   type File {

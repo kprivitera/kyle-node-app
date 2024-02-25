@@ -26,7 +26,10 @@ const userResolver = {
       const book = await getBookById(id);
       return { ...book, userId };
     },
-    books: async () => await getAllBooks(),
+    books: async (_parent: unknown, _args: { ids?: number[] }) => {
+      const { ids } = _args;
+      return await getAllBooks(ids);
+    },
     authors: async () => await getAllAuthors(),
     searchBooks: async (_parent: unknown, _args: { searchTerm: string }) => {
       const { searchTerm } = _args;

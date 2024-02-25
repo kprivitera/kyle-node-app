@@ -16,6 +16,7 @@ import {
   updateUser,
   searchUsers,
 } from "../../models/users";
+import { getAllBookClubsForUser } from "../../models/book-clubs";
 import { updateCoverImage, updateProfileImage } from "../../models/file-upload";
 
 const JWT_SECRET = process.env.JWT_SECRET || "secret";
@@ -36,6 +37,11 @@ const userResolver = {
       args: { searchTerm: string; currentUserId: number }
     ) => {
       return await searchUsers(args.searchTerm, args.currentUserId);
+    },
+  },
+  User: {
+    bookClubs: async (user: any) => {
+      return await getAllBookClubsForUser(user.id);
     },
   },
   Mutation: {

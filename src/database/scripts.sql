@@ -128,7 +128,8 @@ CREATE TABLE club_members (
     id SERIAL PRIMARY KEY,
     user_id INTEGER REFERENCES users(id),
     book_club_id INTEGER REFERENCES book_clubs(id),
-    joined_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    joined_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    unique (user_id, book_club_id) -- this enforces the uniqueness of a member
 );
 
 CREATE TABLE club_schedules (

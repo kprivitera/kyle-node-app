@@ -94,7 +94,7 @@ const booksTypeDef = gql`
 
   extend type Query {
     book(id: ID, userId: ID): Book
-    books: [Book]
+    books(ids: [ID]): [Book]
     authors: [Author]
     searchBooks(searchTerm: String!): [SearchResult]
   }
